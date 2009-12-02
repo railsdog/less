@@ -120,43 +120,24 @@ module Less
     rule import
       ws "@import" S url:(string / url) medias? s ';' ws {
         def build env
-          
-          puts ' - import - '
-          path = File.join(env.root.file || Dir.pwd, url.value)
-          puts path.inspect
+          standard_path = File.join(env.root.file || Dir.pwd, url.value)
 
-          # Compile a list of possible paths for this file, the first being in the current directory
-          # Find the first if any that exists
-          paths = LESS_SOURCE_PATHS.map { |p| File.join(p, url.value) }
-          puts 'all paths'
-          puts paths.inspect
-
-          paths.unshift(path)                    
-          puts 'all paths + current path'
-          puts paths.inspect
-
-          paths.map! {|p| File.expand_path(p)}
-          puts 'all paths expanded'
-          puts paths.inspect
-
-          paths.uniq!
-          puts 'all paths unique'
-          puts paths.inspect
-
-          paths.map! do |p|
+          # Compile a list of possible paths for this file
+          paths = [standard_path] + LESS_SOURCE_PATHS.map { |p| File.join(p, url.value) }
+          # Standardize and make uniq
+          paths = paths.map do |p|
+            p = File.expand_path(p)
             p += '.less' unless p =~ /\.(le|c)ss$/
             p
-          end
-          puts paths.inspect
-
+          end.uniq
+          # Use the first that exists if any
           if path = paths.detect {|p| File.exists?(p)}
-            puts " - importing from #{path}"
             unless env.root.imported.include?(path)
               env.root.imported << path
               env.rules += Less::Engine.new(File.new(path)).to_tree.rules
             end
           else
-            raise ImportError, path
+            raise ImportError, standard_path
           end
 
         end
