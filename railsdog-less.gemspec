@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "bin/lessc",
-     "less.gemspec",
+     "railsdog-less.gemspec",
      "lib/less.rb",
      "lib/less/command.rb",
      "lib/less/engine.rb",
